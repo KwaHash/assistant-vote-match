@@ -22,7 +22,7 @@ export default function MemberHeader() {
   return (
     <div className='hidden md:flex items-center gap-6'>
       {navItems.map(({ href, label, icon: Icon }) => {
-        const isActive = pathname === href
+        const isActive = pathname.startsWith(href)
         return (
           <Link key={href} href={href} className={linkClass}>
             <Icon
