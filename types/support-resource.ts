@@ -1,10 +1,10 @@
-export interface SupportResourceRow {
+export interface ISupportResource {
   id: number
+  assistant_id: number
   provider_type: string
   provider_name: string
   contact_email: string
   contact_phone: string | null
-  website_url: string | null
   prefecture: string
   municipality: string | null
   content: string
@@ -20,7 +20,6 @@ export interface CreateSupportResourceBody {
   provider_name: string
   contact_email: string
   contact_phone?: string
-  website_url?: string
   prefecture: string
   municipality?: string
   content: string
