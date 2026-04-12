@@ -82,7 +82,6 @@ export default function SupportResourceRegisterPage() {
   const onSubmit = async (data: ISupportResourceForm) => {
     setError('')
 
-
     try {
       const { data: { resource_id } } = await axios.post('/api/resources/register', { ...data, user_id })
       if (resource_id) {
