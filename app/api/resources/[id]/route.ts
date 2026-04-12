@@ -42,7 +42,7 @@ export async function GET( request: NextRequest, { params }: { params: { id: str
       content: row.content,
       price_type: row.price_type,
       availability: row.availability,
-      coverage_area: row.coverage_area ? JSON.parse(row.coverage_area as string) : null,
+      coverage_area: row.coverage_area == null ? null : typeof row.coverage_area === 'string' ? JSON.parse(row.coverage_area as string) : row.coverage_area,
       created_at: row.created_at,
     }
 
