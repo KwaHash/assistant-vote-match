@@ -27,14 +27,14 @@ export default function MemberHeader() {
           <Link key={href} href={href} className={linkClass}>
             <Icon
               className={cn(
-                'text-2xl transition-colors duration-300 group-hover:text-primary',
-                isActive ? 'text-primary' : 'text-[#333]'
+                'text-2xl transition-colors duration-300 group-hover:text-secondary',
+                isActive ? 'text-secondary' : 'text-[#333]'
               )}
             />
             <span
               className={cn(
-                'transition-colors duration-300 group-hover:text-primary',
-                isActive ? 'text-primary' : 'text-[#333]'
+                'transition-colors duration-300 group-hover:text-secondary',
+                isActive ? 'text-secondary' : 'text-[#333]'
               )}
             >
               {label}
