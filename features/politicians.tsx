@@ -4,14 +4,11 @@ import { PoliticianCard } from '@/components/card/politician-card'
 import LoadingIndicator from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Pagination, PaginationContent, PaginationEllipsis, PaginationItem,
-  PaginationLink, PaginationNext, PaginationPrevious
-} from '@/components/ui/pagination'
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import VotePagination from '@/components/vote-pagination'
 import { parties } from '@/constants/parties'
-import { cn, politiciansListToCsv } from '@/lib/utils'
 import { IPolitician } from '@/types/politician'
 import axios from 'axios'
 import { useEffect, useState } from 'react'
@@ -78,60 +75,8 @@ const PoliticiansPage = () => {
   const endIndex = startIndex + itemsPerPage
   const currentPoliticians = filteredPoliticians.slice(startIndex, endIndex)
 
-  // Generate page numbers to display
-  const getPageNumbers = () => {
-    const pages: (number | 'ellipsis')[] = []
-    const maxVisiblePages = 5
-
-    if (totalPages <= maxVisiblePages) {
-      // Show all pages if total is less than max visible
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
-      }
-    } else {
-      // Show first page
-      pages.push(1)
-
-      if (currentPage <= 3) {
-        // Near the beginning
-        for (let i = 2; i <= 4; i++) {
-          pages.push(i)
-        }
-        pages.push('ellipsis')
-        pages.push(totalPages)
-      } else if (currentPage >= totalPages - 2) {
-        // Near the end
-        pages.push('ellipsis')
-        for (let i = totalPages - 3; i <= totalPages; i++) {
-          pages.push(i)
-        }
-      } else {
-        // In the middle
-        pages.push('ellipsis')
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i)
-        }
-        pages.push('ellipsis')
-        pages.push(totalPages)
-      }
-    }
-
-    return pages
-  }
-
   if (isLoading) {
     return <LoadingIndicator />
-  }
-
-  const downloadCsv = () => {
-    const csv = politiciansListToCsv(filteredPoliticians)
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `政治家一覧_${filterParty}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
   }
 
   return (
@@ -199,7 +144,7 @@ const PoliticiansPage = () => {
       </section>
 
       {/* Politicians List */}
-      <section className='w-full max-w-6xl mx-auto px-4 md:px-8 py-12'>
+      <section className='w-full max-w-6xl mx-auto px-4 md:px-8'>
         <div className='flex justify-between items-center mb-6 flex-wrap gap-3'>
           <div className='text-sm'>
             全{filteredPoliticians.length}名のうち、{filteredPoliticians.length === 0 ? 0 : startIndex + 1}番から{filteredPoliticians.length === 0 ? 0 : Math.min(endIndex, filteredPoliticians.length)}番までを表示しております。
@@ -226,56 +171,7 @@ const PoliticiansPage = () => {
           </div>
         </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className='my-10'>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault()
-                      if (currentPage > 1) setCurrentPage(currentPage - 1)
-                    }}
-                    className={cn('rounded-none hover:bg-secondary/80 transition-all duration-300 cursor-pointer px-3', currentPage === 1 ? 'pointer-events-none opacity-50' : '')}
-                  />
-                </PaginationItem>
-
-                {getPageNumbers().map((page, index) => (
-                  <PaginationItem key={index}>
-                    {page === 'ellipsis' ? (
-                      <PaginationEllipsis />
-                    ) : (
-                      <PaginationLink
-                        href='#'
-                        onClick={(e) => {
-                          e.preventDefault()
-                          setCurrentPage(page as number)
-                        }}
-                        className='hover:bg-secondary/80 transition-all duration-300 cursor-pointer'
-                        isActive={currentPage === page}
-                      >
-                        {page}
-                      </PaginationLink>
-                    )}
-                  </PaginationItem>
-                ))}
-
-                <PaginationItem>
-                  <PaginationNext
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault()
-                      if (currentPage < totalPages) setCurrentPage(currentPage + 1)
-                    }}
-                    className={cn('rounded-none hover:bg-secondary/80 transition-all duration-300 cursor-pointer px-3', currentPage === totalPages ? 'pointer-events-none opacity-50' : '')}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        )}
+        {totalPages > 1 && <VotePagination totalPages={totalPages} currentPage={currentPage} setCurrentPage={setCurrentPage} />}
 
         <div className='rounded-md border'>
           <Table className='w-full'>
@@ -299,56 +195,7 @@ const PoliticiansPage = () => {
           </Table>
         </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className='mt-12'>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault()
-                      if (currentPage > 1) setCurrentPage(currentPage - 1)
-                    }}
-                    className={cn('rounded-none hover:bg-secondary/80 transition-all duration-300 cursor-pointer px-3', currentPage === 1 ? 'pointer-events-none opacity-50' : '')}
-                  />
-                </PaginationItem>
-
-                {getPageNumbers().map((page, index) => (
-                  <PaginationItem key={index}>
-                    {page === 'ellipsis' ? (
-                      <PaginationEllipsis />
-                    ) : (
-                      <PaginationLink
-                        href='#'
-                        onClick={(e) => {
-                          e.preventDefault()
-                          setCurrentPage(page as number)
-                        }}
-                        className='hover:bg-secondary/80 transition-all duration-300 cursor-pointer'
-                        isActive={currentPage === page}
-                      >
-                        {page}
-                      </PaginationLink>
-                    )}
-                  </PaginationItem>
-                ))}
-
-                <PaginationItem>
-                  <PaginationNext
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault()
-                      if (currentPage < totalPages) setCurrentPage(currentPage + 1)
-                    }}
-                    className={cn('rounded-none hover:bg-secondary/80 transition-all duration-300 cursor-pointer px-3', currentPage === totalPages ? 'pointer-events-none opacity-50' : '')}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        )}
+        {totalPages > 1 && <VotePagination totalPages={totalPages} currentPage={currentPage} setCurrentPage={setCurrentPage} />}
       </section>
     </div>
   )
