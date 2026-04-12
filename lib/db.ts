@@ -35,7 +35,7 @@ async function initializeDatabase(db: Connection) {
       email VARCHAR(255) NOT NULL UNIQUE,
       password VARCHAR(255) NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ) AUTO_INCREMENT=10000
+    ) AUTO_INCREMENT=100000
   `)
 
   // email verification tokens
