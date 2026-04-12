@@ -11,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { useAuth } from '@/providers/auth-provider'
 import { yupResolver } from '@hookform/resolvers/yup'
 import axios from 'axios'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { FiMail, FiPhone, FiUser } from 'react-icons/fi'
@@ -18,7 +19,7 @@ import { HiOutlineBuildingOffice2 } from 'react-icons/hi2'
 import { MdOutlineDescription } from 'react-icons/md'
 import * as yup from 'yup'
 
-interface ISupportResourceForm {
+export interface ISupportResourceForm {
   provider_type: string
   provider_name: string
   contact_email: string
@@ -31,25 +32,25 @@ interface ISupportResourceForm {
   coverage_area?: string[]
 }
 
-const providerTypes = [
+export const providerTypes = [
   { value: '個人', label: '個人' },
   { value: '法人', label: '法人' },
   { value: '団体', label: '団体' },
   { value: '自治体', label: '自治体' },
 ]
 
-const priceTypes = [
+export const priceTypes = [
   { value: '無料', label: '無料' },
   { value: '有料', label: '有料' },
   { value: '要相談', label: '要相談' },
 ]
 
-const availabilityTypes = [
+export const availabilityTypes = [
   { value: '常時', label: '常時' },
   { value: '選挙期間のみ', label: '選挙期間のみ' },
 ]
 
-const schema = yup.object().shape({
+export const schema = yup.object().shape({
   provider_type: yup.string().required('提供者タイプは必須です'),
   provider_name: yup.string().required('提供者名は必須です'),
   contact_email: yup.string().required('メールアドレスは必須です').email('メールアドレスを正しく入力してください'),
@@ -64,8 +65,8 @@ const schema = yup.object().shape({
 
 export default function SupportResourceRegisterPage() {
   const [error, setError] = useState<string>('')
-  const [success, setSuccess] = useState<string>('')
   const { user_id } = useAuth()
+  const router = useRouter()
 
   const { control, handleSubmit, reset, formState: { errors } } = useForm<ISupportResourceForm>({
     resolver: yupResolver(schema),
@@ -80,14 +81,12 @@ export default function SupportResourceRegisterPage() {
 
   const onSubmit = async (data: ISupportResourceForm) => {
     setError('')
-    setSuccess('')
 
 
     try {
       const { data: { resource_id } } = await axios.post('/api/resources/register', { ...data, user_id })
       if (resource_id) {
-        setSuccess('支援リソースが正常に登録されました。')
-        reset()
+        router.push('/support-resource')
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
@@ -98,11 +97,10 @@ export default function SupportResourceRegisterPage() {
 
   return (
     <div className='w-full max-w-5xl mx-auto px-4 md:px-8 py-8 md:py-16 min-h-full'>
-      <h2 className='text-2xl text-gray-900 text-center mb-8 font-bold'>支援リソース登録</h2>
-
+      <h2 className='border-secondary border-l-[6px] text-2xl pl-4 mb-6 font-bold text-gray-700'>支援リソース登録</h2>
       <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-6'>
         <section className='bg-white w-full rounded-lg shadow-sm overflow-hidden border border-gray-200/80'>
-          <div className='bg-green-500 px-6 py-3 border-b border-green-500/80'>
+          <div className='bg-secondary px-6 py-3 border-b border-secondary/80'>
             <h3 className='text-lg font-medium text-white flex items-center gap-2'>
               <HiOutlineBuildingOffice2 className='text-xl shrink-0' />
               <span>提供者情報</span>
@@ -208,7 +206,7 @@ export default function SupportResourceRegisterPage() {
         </section>
 
         <section className='bg-white w-full rounded-lg shadow-sm overflow-hidden border border-gray-200/80'>
-          <div className='bg-green-500 px-6 py-3 border-b border-green-500/80'>
+          <div className='bg-secondary px-6 py-3 border-b border-secondary/80'>
             <h3 className='text-lg font-medium text-white flex items-center gap-2'>
               <MdOutlineDescription className='text-xl shrink-0' />
               <span>リソース内容</span>
@@ -228,7 +226,7 @@ export default function SupportResourceRegisterPage() {
                   <Textarea
                     {...field}
                     id='content'
-                    className='rounded-none min-h-[200px] leading-6'
+                    className='rounded-none min-h-[200px] leading-6 whitespace-pre-wrap'
                     placeholder={`提供できる支援リソースの内容を自由に記述してください。\n例:      − 選挙ポスターのデザイン制作（A3サイズ）\n            − 印刷手配も可能\n            − 過去に地方選挙で5名の候補者を支援した実績あり\n`}
                   />
                 )}
@@ -356,12 +354,6 @@ export default function SupportResourceRegisterPage() {
         {error && (
           <p className='w-full bg-red-50 border-l-4 border-red-400 p-4 text-sm text-red-700'>
             {error}
-          </p>
-        )}
-
-        {success && (
-          <p className='w-full bg-green-50 border-l-4 border-green-400 p-4 text-sm text-green-700'>
-            {success}
           </p>
         )}
 
