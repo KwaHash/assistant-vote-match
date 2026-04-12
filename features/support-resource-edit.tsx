@@ -2,6 +2,7 @@
 
 import InputField from '@/components/input/input-field'
 import RequiredLabel from '@/components/label/required-label'
+import LoadingIndicator from '@/components/loading-indicator'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -12,62 +13,18 @@ import { useAuth } from '@/providers/auth-provider'
 import { yupResolver } from '@hookform/resolvers/yup'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { FiMail, FiPhone, FiUser } from 'react-icons/fi'
 import { HiOutlineBuildingOffice2 } from 'react-icons/hi2'
 import { MdOutlineDescription } from 'react-icons/md'
-import * as yup from 'yup'
+import { availabilityTypes, ISupportResourceForm, priceTypes, providerTypes, schema } from './support-resource-register'
 
-export interface ISupportResourceForm {
-  provider_type: string
-  provider_name: string
-  contact_email: string
-  contact_phone?: string
-  prefecture: string
-  municipality?: string
-  content: string
-  price_type: string
-  availability: string
-  coverage_area?: string[]
-}
-
-export const providerTypes = [
-  { value: '個人', label: '個人' },
-  { value: '法人', label: '法人' },
-  { value: '団体', label: '団体' },
-  { value: '自治体', label: '自治体' },
-]
-
-export const priceTypes = [
-  { value: '無料', label: '無料' },
-  { value: '有料', label: '有料' },
-  { value: '要相談', label: '要相談' },
-]
-
-export const availabilityTypes = [
-  { value: '常時', label: '常時' },
-  { value: '選挙期間のみ', label: '選挙期間のみ' },
-]
-
-export const schema = yup.object().shape({
-  provider_type: yup.string().required('提供者タイプは必須です'),
-  provider_name: yup.string().required('提供者名は必須です'),
-  contact_email: yup.string().required('メールアドレスは必須です').email('メールアドレスを正しく入力してください'),
-  contact_phone: yup.string().optional(),
-  prefecture: yup.string().required('都道府県は必須です'),
-  municipality: yup.string().optional(),
-  content: yup.string().required('支援内容は必須です'),
-  price_type: yup.string().required('価格タイプは必須です'),
-  availability: yup.string().required('提供時期は必須です'),
-  coverage_area: yup.array().of(yup.string().required()).optional(),
-})
-
-export default function SupportResourceRegisterPage() {
-  const [error, setError] = useState<string>('')
+const SupportResourceEditPage = ({ id }: { id : string }) => {
   const { user_id } = useAuth()
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string>('')
   const router = useRouter()
-
   const { control, handleSubmit, reset, formState: { errors } } = useForm<ISupportResourceForm>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -79,24 +36,67 @@ export default function SupportResourceRegisterPage() {
     },
   })
 
+  useEffect(() => {
+    const fetchResource = async () => {
+      if (!user_id || !id) {
+        setIsLoading(false)
+        if (!user_id) setError('ログイン情報を取得できませんでした。')
+        return
+      }
+
+      try {
+        const { data } = await axios.get<{ resource: Record<string, unknown> }>(`/api/resources/${id}`, { params: { user_id } })
+        const r = data.resource
+        const coverage = r.coverage_area
+        reset({
+          provider_type: String(r.provider_type ?? ''),
+          provider_name: String(r.provider_name ?? ''),
+          contact_email: String(r.contact_email ?? ''),
+          contact_phone: r.contact_phone ? String(r.contact_phone) : undefined,
+          prefecture: String(r.prefecture ?? ''),
+          municipality: r.municipality ? String(r.municipality) : undefined,
+          content: String(r.content ?? ''),
+          price_type: String(r.price_type ?? ''),
+          availability: String(r.availability ?? ''),
+          coverage_area: Array.isArray(coverage) ? (coverage as string[]) : undefined,
+        })
+        setError('')
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          setError(err.response?.data?.error || '取得に失敗しました。')
+        } else {
+          setError('取得に失敗しました。')
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void fetchResource()
+  }, [user_id, id, reset])
+
   const onSubmit = async (data: ISupportResourceForm) => {
     setError('')
-
-
+    
     try {
-      const { data: { resource_id } } = await axios.post('/api/resources/register', { ...data, user_id })
+      const { data: { resource_id } } = await axios.post(`/api/resources/edit/${id}`, { ...data, user_id })
       if (resource_id) {
         router.push('/support-resource')
       }
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        setError(err.response?.data?.error || '登録に失敗しました。')
+        setError(err.response?.data?.error || '更新に失敗しました。')
       }
     }
   }
 
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
+
   return (
     <div className='min-h-screen bg-white'>
+      {/* Hero */}
       <section className='relative bg-white'>
         <div className='absolute inset-0 bg-gradient-to-r from-secondary to-secondary/85' />
         <div className='relative max-w-7xl mx-auto px-4 py-24'>
@@ -119,7 +119,7 @@ export default function SupportResourceRegisterPage() {
 
       <section className='flex justify-between items-center mb-6 flex-wrap gap-3 w-full max-w-6xl mx-auto px-4 md:px-8 pt-12 bg-background/50 backdrop-blur-sm'>
         <div className='w-full flex justify-between items-center'>
-          <h2 className='border-secondary border-l-[6px] text-2xl pl-4 mb-6 font-bold text-gray-700'>支援リソース登録</h2>
+          <h2 className='border-secondary border-l-[6px] text-2xl pl-4 mb-3 font-bold text-gray-700'>支援リソース編集</h2>
         </div>
       </section>
 
@@ -388,10 +388,12 @@ export default function SupportResourceRegisterPage() {
             variant='default'
             className='w-full max-w-64 mt-4 mx-auto h-auto py-3 text-base rounded-full bg-m-blue hover:bg-m-hover-blue transform transition-all duration-300'
           >
-            登録する
+            更新する
           </Button>
         </div>
       </form>
     </div>
   )
 }
+
+export default SupportResourceEditPage
