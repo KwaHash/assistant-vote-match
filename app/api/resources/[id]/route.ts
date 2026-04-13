@@ -1,4 +1,5 @@
 import { withDatabase } from '@/lib/db'
+import type { ResultSetHeader } from 'mysql2'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET( request: NextRequest, { params }: { params: { id: string } }) {
@@ -50,6 +51,43 @@ export async function GET( request: NextRequest, { params }: { params: { id: str
   } catch {
     return NextResponse.json(
       { error: '取得に失敗しました。しばらくしてから再度お試しください。' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const userIdParam = request.nextUrl.searchParams.get('user_id')
+    if (!userIdParam) {
+      return NextResponse.json({ error: 'assistant_idが必要です。' }, { status: 400 })
+    }
+
+    const resourceId = Number(params.id)
+    const assistantId = Number(userIdParam)
+    if (!Number.isFinite(resourceId) || resourceId <= 0) {
+      return NextResponse.json({ error: '無効なIDです。' }, { status: 400 })
+    }
+    if (!Number.isFinite(assistantId) || assistantId <= 0) {
+      return NextResponse.json({ error: '無効なassistant_idです。' }, { status: 400 })
+    }
+
+    const affectedRows = await withDatabase(async (db) => {
+      const [result] = await db.execute<ResultSetHeader>(
+        'DELETE FROM resources WHERE id = ? AND assistant_id = ?',
+        [resourceId, assistantId]
+      )
+      return result.affectedRows
+    })
+
+    if (affectedRows === 0) {
+      return NextResponse.json({ error: 'リソースが見つかりません。' }, { status: 404 })
+    }
+
+    return NextResponse.json({ ok: true })
+  } catch {
+    return NextResponse.json(
+      { error: '削除に失敗しました。しばらくしてから再度お試しください。' },
       { status: 500 }
     )
   }
