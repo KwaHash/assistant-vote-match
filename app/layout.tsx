@@ -1,4 +1,5 @@
 import Providers from '@/app/providers'
+import DeleteConfirmationDialog from '@/components/dialog/delete-confirmation-dialog'
 import MainHeader from '@/components/header/main-header'
 import TailwindIndicator from '@/components/tailwind-indicator'
 import { Toaster as Sonner } from '@/components/ui/sonner'
@@ -37,6 +38,7 @@ export default function RootLayout({
               </main>
             </div>
             <TailwindIndicator />
+            <DeleteConfirmationDialog />
           </Providers>
         </body>
       </html>
