@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { assistants } from '@/constants/assistants'
 import { useAuth } from '@/providers/auth-provider'
+import { updateDeleteDialog } from '@/stores/dialogs/dialogs.slice'
+import { useAppDispatch } from '@/stores/store'
 import { ISupportResource } from '@/types/support-resource'
 import axios from 'axios'
 import Link from 'next/link'
@@ -16,6 +18,7 @@ import { LuPlus } from 'react-icons/lu'
 
 const SupportResourcesPage = () => {
   const { user_id } = useAuth()
+  const dispatch = useAppDispatch()
   const [searchQuery, setSearchQuery] = useState('')
   const [filterAssistant, setFilterAssistant] = useState('全タイプ')
   const [allResources, setAllResources] = useState<ISupportResource[]>([])
@@ -62,6 +65,29 @@ const SupportResourcesPage = () => {
     setFilteredResources(searchedResources)
   }
 
+  const handleDeleteResource = (id: number) => {
+    dispatch(
+      updateDeleteDialog({
+        isOpen: true,
+        title: '支援リソース削除',
+        description: 'この支援リソースを削除してもよろしいですか？',
+        onDelete: async () => {
+          setIsLoading(true)
+          try {
+            await axios.delete(`/api/resources/${id}`, { params: { user_id } })
+            setAllResources((prev) => prev.filter((r) => r.id !== id))
+            setFilteredResources((prev) => prev.filter((r) => r.id !== id))
+          } catch (err) {
+            if (axios.isAxiosError(err) && err.response?.data?.error) {
+              console.error(err.response.data.error)
+            }
+          } finally {
+            setIsLoading(false)
+          }
+        },
+      }),
+    )
+  }
 
   if (isLoading) {
     return <LoadingIndicator />
@@ -143,7 +169,7 @@ const SupportResourcesPage = () => {
         <div className='flex flex-col gap-3'>
           {filteredResources.length > 0 ? (
             filteredResources.map((resource) => (
-              <ResourceItem key={resource.id} resource={resource} />
+              <ResourceItem key={resource.id} resource={resource} onDelete={handleDeleteResource} />
             ))
           ) : (
             <p className='bg-[#fcf8e3] border-[#faebcc] text-gray-600 border-[1px] p-4 rounded-sm'>支援リソースがありません</p>

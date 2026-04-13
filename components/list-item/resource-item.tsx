@@ -1,11 +1,13 @@
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { ISupportResource } from '@/types/support-resource'
 import Link from 'next/link'
-import { FaEdit } from 'react-icons/fa'
+import { FaEdit, FaRegTrashAlt } from 'react-icons/fa'
 import { FiMail, FiMapPin, FiPhone } from 'react-icons/fi'
 
 interface IResourceItem {
   resource: ISupportResource
+  onDelete: (id: number) => void
 }
 
 function providerTypeBadgeClass(providerType: string): string {
@@ -36,7 +38,7 @@ function priceTypeBadgeClass(priceType: string): string {
   }
 }
 
-const ResourceItem = ({ resource }: IResourceItem) => {
+const ResourceItem = ({ resource, onDelete }: IResourceItem) => {
   const {
     provider_type,
     provider_name,
@@ -102,11 +104,19 @@ const ResourceItem = ({ resource }: IResourceItem) => {
           </div>
         </div>
 
-        <div className='flex flex-row lg:flex-col gap-2 pr-4 pt-4'>
+        <div className='flex flex-col gap-2 pr-4 pt-4'>
           <Link href={`/support-resource/edit/${resource.id}`} className={cn('flex items-center justify-center px-3 py-2 gap-2 rounded w-auto h-auto', providerTypeBadgeClass(provider_type))}>
             <FaEdit className='w-4 h-4' />
             <span className='text-sm'>編集</span>
           </Link>
+          <Button
+            onClick={() => { onDelete(resource.id) }}
+            variant='ghost'
+            className='flex items-center justify-center bg-primary text-white border-[1.5px] w-auto h-auto px-3 py-2 rounded hover:bg-primary/90 hover:text-white transition-all duration-300'
+          >
+            <FaRegTrashAlt className='h-4 w-4' />
+            <span className='text-sm'>削除</span>
+          </Button>
         </div>
       </div>
     </div>
