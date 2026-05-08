@@ -5,11 +5,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { FaListUl } from 'react-icons/fa'
 import { HiOutlineBookOpen } from 'react-icons/hi'
-import { RiLogoutCircleRLine, RiRobot2Line } from 'react-icons/ri'
+import { RiLogoutCircleRLine, RiMessage3Line, RiRobot2Line } from 'react-icons/ri'
 
 const navItems = [
   { href: '/ai-chat', label: 'AIチャット', icon: RiRobot2Line },
   { href: '/politicians', label: '政治家一覧', icon: FaListUl },
+  { href: '/messages', label: 'メッセージ', icon: RiMessage3Line  },
   { href: '/support-resource', label: '支援リソース', icon: HiOutlineBookOpen },
   { href: '/logout', label: 'ログアウト', icon: RiLogoutCircleRLine },
 ] as const
