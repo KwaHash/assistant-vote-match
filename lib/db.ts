@@ -33,6 +33,7 @@ async function initializeDatabase(db: Connection) {
     CREATE TABLE IF NOT EXISTS assistants (
       id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
       email VARCHAR(255) NOT NULL UNIQUE,
+      username VARCHAR(255) NOT NULL UNIQUE,
       password VARCHAR(255) NOT NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) AUTO_INCREMENT=100000
