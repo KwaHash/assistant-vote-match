@@ -8,6 +8,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 export interface AuthState {
   user_id: string
   user_email: string
+  user_name: string
 }
 
 interface AuthContextType extends AuthState {
@@ -17,6 +18,7 @@ interface AuthContextType extends AuthState {
 const AuthContext = createContext<AuthContextType>({
   user_id: '',
   user_email: '',
+  user_name: '',
   updateAuthState: () => {},
 })
 
@@ -29,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>({
     user_id: '',
     user_email: '',
+    user_name: '',
   })
 
   useEffect(() => {
@@ -59,6 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setAuthState({
             user_id: data.user_id,
             user_email: data.user_email,
+            user_name: data.user_name ?? '',
           })
 
           if (data.access_token) {

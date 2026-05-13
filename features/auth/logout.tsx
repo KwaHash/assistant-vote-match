@@ -17,6 +17,7 @@ const LogOutPage = () => {
       updateAuthState({
         user_id: '',
         user_email: '',
+        user_name: '',
       })
       router.push('https://seijiselect.jp')
       setIsLoading(false)
