@@ -1,7 +1,8 @@
 import Link from 'next/link'
 
 const PROTOTYPES = [
-  { href: '/prototype/register', title: '支援者登録', priority: '高', description: '関心政策・提供できる支援・地域・公開範囲を登録。支援マッチングの素になる。', notes: ['個人/法人・関心政策・支援タイプ・支援可能地域・公開範囲', '本番: supporters テーブル'] },
+  { href: '/prototype/dashboard', title: '支援ダッシュボード（マイページ）', priority: '高', description: '【方針変更】assist は自分から登録する入口でなく、政策/候補者/クラファン/LINE から支援表明した人が戻る「支援後のマイページ」。今できる支援・支援履歴・寄付レポートを集約。', notes: ['今できる支援（拡散/参加/回答/紹介）', '支援履歴サマリー・寄付レポート'] },
+  { href: '/prototype/register', title: '支援者登録', priority: '中', description: '関心政策・提供できる支援・地域・公開範囲を登録（任意）。※入口は各サイトの支援導線に埋め込む方針に変更。', notes: ['個人/法人・関心政策・支援タイプ・支援可能地域・公開範囲', '本番: supporters テーブル'] },
   { href: '/prototype/requests', title: '支援案件一覧', priority: '高', description: 'candidate で登録された支援募集を一覧・絞り込み（政策/支援種別/報酬）。', notes: ['政策テーマ・支援種別・報酬で絞り込み', '本番: support_requests テーブル'] },
   { href: '/prototype/matching', title: '支援マッチング', priority: '高', description: '登録した関心政策・支援タイプ・地域と募集を自動マッチングし、合う案件を提示。', notes: ['一致理由（関心政策/提供できる支援/地域）を表示', '支援者プロフィール × 募集で算出'] },
   { href: '/prototype/resources', title: 'リソース提供登録', priority: '高', description: 'お金以外の支援（物品・場所・スキル・人脈・SNS）を登録。', notes: ['種別・内容・対象地域・提供条件を登録', '本番: supports テーブル'] },
