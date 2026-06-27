@@ -18,6 +18,7 @@ const SUPPORT_TYPES = ['無償ボランティア', '有償業務', '物品提供
 const SKILLS = ['デザイン', '動画編集', '撮影', 'SNS運用', 'Web制作', 'イベント運営', '会計', '法務', '広報', 'データ分析', '政策調査', '防災', '子育て', '福祉', '行政DX', '地域経済'] as const
 const SCOPES = ['オンライン', '現地対応', '全国対応', '地域限定'] as const
 const VIS = ['一般公開', '政治家にのみ公開', '承認制', '非公開'] as const
+const NATIONALITY = ['日本国籍 / 日本に拠点のある法人・団体', '外国籍 / 外国法人 / 外国人が主な構成員の団体'] as const
 
 // サポータータイプ判定（ルールベース）
 const RESULT_RULES: { type: string; emoji: string; skills?: string[]; supportTypes?: string[]; need?: string; theme?: string }[] = [
@@ -38,7 +39,12 @@ export default function AssistDiagnosisPage() {
   const [supportTypes, setSupportTypes] = useState<string[]>([])
   const [skills, setSkills] = useState<string[]>([])
   const [visibility, setVisibility] = useState<string>('政治家にのみ公開')
+  const [nationality, setNationality] = useState<string>(NATIONALITY[0])
   const [done, setDone] = useState(false)
+
+  const isForeign = nationality === NATIONALITY[1]
+  const wantsDonation = supportTypes.includes('物品提供') // 物品提供＝寄付に該当しうる
+  const showForeignWarn = isForeign && wantsDonation
 
   const toggle = (arr: string[], set: (v: string[]) => void, v: string) =>
     set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v])
@@ -59,7 +65,7 @@ export default function AssistDiagnosisPage() {
   ).slice(0, 3)
 
   const run = () => {
-    try { localStorage.setItem('proto_assist_diagnosis_v1', JSON.stringify({ kind, area, scope, supportTypes, skills, visibility, type: result.type })) } catch { /* ignore */ }
+    try { localStorage.setItem('proto_assist_diagnosis_v1', JSON.stringify({ kind, area, scope, supportTypes, skills, visibility, nationality, type: result.type })) } catch { /* ignore */ }
     setDone(true)
   }
 
@@ -123,6 +129,16 @@ export default function AssistDiagnosisPage() {
         <div className='rounded-xl border border-gray-200 bg-white p-4'>
           <label className={labelCls}>支援できる形態（複数可）</label>
           <div className='flex flex-wrap gap-2'>{SUPPORT_TYPES.map((s) => <button key={s} onClick={() => toggle(supportTypes, setSupportTypes, s)} className={chip(supportTypes.includes(s))}>{s}</button>)}</div>
+          <p className='mt-2 text-[11px] leading-relaxed text-gray-400'>※「有償業務」は政策づくり・日常の政治活動等が対象です。<span className='font-medium text-gray-500'>選挙運動への有償の関与（公選法の買収等）はできません。</span></p>
+        </div>
+        <div className='rounded-xl border border-gray-200 bg-white p-4'>
+          <label className={labelCls}>国籍・属性</label>
+          <div className='flex flex-col gap-2'>{NATIONALITY.map((v) => <button key={v} onClick={() => setNationality(v)} className={`${chip(nationality === v)} text-left`}>{v}</button>)}</div>
+          {showForeignWarn && (
+            <p className='mt-2 rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-700'>
+              外国籍・外国法人等からの<span className='font-semibold'>寄付・献金・物品提供は政治資金規正法で禁止</span>されています。スキル提供・無償協力などはご相談いただけます。
+            </p>
+          )}
         </div>
         <div className='rounded-xl border border-gray-200 bg-white p-4'>
           <label className={labelCls}>得意分野（複数可）</label>
